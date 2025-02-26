@@ -37,6 +37,8 @@ class WidgetVisitor implements m.NodeVisitor {
   ///use [splitRegExp] to split markdown data
   final RegExp? splitRegExp;
 
+  final List<String> tags;
+
   static RegExp defaultSplitRegExp = RegExp(r'(\r?\n)|(\r)');
 
   WidgetVisitor({
@@ -46,6 +48,7 @@ class WidgetVisitor implements m.NodeVisitor {
     this.textGenerator,
     this.richTextBuilder,
     this.splitRegExp,
+    this.tags = const [],
   }) {
     this.config = config ?? MarkdownConfig.defaultConfig;
     for (var e in generators) {
@@ -146,9 +149,13 @@ class WidgetVisitor implements m.NodeVisitor {
   };
 
   SpanNode getNodeByElement(m.Element element, MarkdownConfig config) {
-    return _tag2node[element.tag]?.call(element, config, this) ??
-        textGenerator?.call(element, config, this) ??
-        TextNode(text: element.textContent);
+    if (tags.isEmpty || tags.contains(element.tag)) {
+      return _tag2node[element.tag]?.call(element, config, this) ??
+          textGenerator?.call(element, config, this) ??
+          TextNode(text: element.textContent);
+    }
+
+    return TextNode(text: element.textContent);
   }
 }
 

@@ -78,5 +78,5 @@ Html Image:
 
 Video:
 
-<video src="http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4">
+<video src="https://vd3.bdstatic.com/mda-qf3hd72uh61avja0/360p/h264/1717503391754262802/mda-qf3hd72uh61avja0.mp4">
 

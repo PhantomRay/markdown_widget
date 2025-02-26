@@ -20,6 +20,15 @@ class MarkdownGenerator {
   final RichTextBuilder? richTextBuilder;
   final RegExp? splitRegExp;
 
+  ///如果使用默认的解析器，此属性必须设置为true，默认值为false
+  final bool withDefaultBlockSyntaxes;
+
+  ///如果使用默认的解析器，此属性必须设置为true，默认值为false
+  final bool withDefaultInlineSyntaxes;
+
+  ///指定哪些标签需要被解析，如果不指定，则所有标签都将被解析
+  final List<String> tags;
+
   MarkdownGenerator({
     this.inlineSyntaxList = const [],
     this.blockSyntaxList = const [],
@@ -31,6 +40,9 @@ class MarkdownGenerator {
     this.spanNodeBuilder,
     this.richTextBuilder,
     this.splitRegExp,
+    this.withDefaultBlockSyntaxes = false,
+    this.withDefaultInlineSyntaxes = false,
+    this.tags = const [],
   });
 
   ///convert [data] to widgets
@@ -43,12 +55,15 @@ class MarkdownGenerator {
       encodeHtml: false,
       inlineSyntaxes: inlineSyntaxList,
       blockSyntaxes: blockSyntaxList,
+      withDefaultBlockSyntaxes: withDefaultBlockSyntaxes,
+      withDefaultInlineSyntaxes: withDefaultInlineSyntaxes,
     );
     final regExp = splitRegExp ?? WidgetVisitor.defaultSplitRegExp;
     final List<String> lines = data.split(regExp);
     final List<m.Node> nodes = document.parseLines(lines);
     final List<Toc> tocList = [];
     final visitor = WidgetVisitor(
+        tags: tags,
         config: mdConfig,
         generators: generators,
         textGenerator: textGenerator,

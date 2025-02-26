@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:markdown_widget/markdown_widget.dart';
-
+import 'package:markdown/markdown.dart' as m;
 import '../markdown_custom/custom_node.dart';
 import '../markdown_custom/latex.dart';
 import '../markdown_custom/video.dart';
@@ -99,21 +99,83 @@ class _MarkdownPageState extends State<MarkdownPage> {
             final codeWrapper = (child, text, language) =>
                 CodeWrapperWidget(child, text, language);
             return MarkdownWidget(
-                data: data!,
-                config: config.copy(configs: [
-                  isDark
-                      ? PreConfig.darkConfig.copy(wrapper: codeWrapper)
-                      : PreConfig().copy(wrapper: codeWrapper)
-                ]),
-                tocController: controller,
-                markdownGenerator: MarkdownGenerator(
-                  generators: [videoGeneratorWithTag, latexGenerator],
-                  inlineSyntaxList: [LatexSyntax()],
-                  textGenerator: (node, config, visitor) =>
-                      CustomTextNode(node.textContent, config, visitor),
-                  richTextBuilder: (span) =>
-                      Text.rich(span, textScaleFactor: 1),
-                ));
+              data: data!,
+              config: config.copy(configs: [
+                isDark
+                    ? PreConfig.darkConfig.copy(wrapper: codeWrapper)
+                    : PreConfig().copy(wrapper: codeWrapper)
+              ]),
+              tocController: controller,
+              markdownGenerator: MarkdownGenerator(
+                tags: [
+                  MarkdownTag.strong.name,
+                  MarkdownTag.li.name,
+                  MarkdownTag.ul.name,
+                  MarkdownTag.ol.name,
+                  MarkdownTag.em.name,
+                 
+                ],
+                inlineSyntaxList: [
+                  // Parse "**strong**" and "*emphasis*" tags.
+                  m.EmphasisSyntax.asterisk(),
+                  // Parse "__strong__" and "_emphasis_" tags.
+                  m.EmphasisSyntax.underscore(),
+                  // m.EmailAutolinkSyntax(),
+                  // m.AutolinkSyntax(),
+                  // m.EscapeSyntax(),
+                  // m.DecodeHtmlSyntax(),
+                  m.LinkSyntax(),
+                  // m.ImageSyntax(),
+                  // LatexSyntax(),
+                ],
+                blockSyntaxList: [
+                  m.EmptyBlockSyntax(),
+                  // m.HtmlBlockSyntax(),
+                  // m.SetextHeaderSyntax(),
+                  m.HeaderSyntax(),
+                  // m.CodeBlockSyntax(),
+                  // m.BlockquoteSyntax(),
+                  // m.HorizontalRuleSyntax(),
+                  m.UnorderedListSyntax(),
+                  m.OrderedListSyntax(),
+                  // m.LinkReferenceDefinitionSyntax(),
+                  // m.ParagraphSyntax()
+                ],
+                // extensionSet:null,//m.ExtensionSet.none,
+                extensionSet: m.ExtensionSet(
+                  List<m.BlockSyntax>.unmodifiable(
+                    <m.BlockSyntax>[
+                      // m.FencedCodeBlockSyntax(),
+                      // m.TableSyntax(),
+                      // m.UnorderedListWithCheckboxSyntax(),
+                      // m.OrderedListWithCheckboxSyntax(),
+                      // m.FootnoteDefSyntax(),
+                    ],
+                  ),
+                  List<m.InlineSyntax>.unmodifiable(
+                    <m.InlineSyntax>[
+                      // m.InlineHtmlSyntax(),
+                      // m.StrikethroughSyntax(),
+                      // m.AutolinkExtensionSyntax()
+                    ],
+                  ),
+                ),
+                generators: [
+                  videoGeneratorWithTag,
+                  latexGenerator,
+                  //覆盖默认的strong tag，只输出文本
+                  // SpanNodeGeneratorWithTag(
+                  //   tag: MarkdownTag.strong.name,
+                  //   generator: (e, config, visitor) {
+                  //     return  TextNode(text: e.textContent) ;
+                  //   },
+                  // ),
+                ],
+                textGenerator: (node, config, visitor) =>
+                    CustomTextNode(node.textContent, config, visitor),
+                richTextBuilder: (span) => Text.rich(span, textScaleFactor: 1),
+              ),
+            );
           }),
     );
   }
