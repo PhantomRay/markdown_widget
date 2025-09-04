@@ -7,6 +7,8 @@ import '../widget/widget_visitor.dart';
 import 'configs.dart';
 import 'toc.dart';
 
+typedef HeadingNodeFilter = bool Function(HeadingNode toc);
+
 ///use [MarkdownGenerator] to transform markdown data to [Widget] list, so you can render it by any type of [ListView]
 class MarkdownGenerator {
   final Iterable<m.InlineSyntax> inlineSyntaxList;
@@ -19,6 +21,7 @@ class MarkdownGenerator {
   final SpanNodeBuilder? spanNodeBuilder;
   final RichTextBuilder? richTextBuilder;
   final RegExp? splitRegExp;
+  final HeadingNodeFilter headingNodeFilter;
 
   ///如果使用默认的解析器，此属性必须设置为true，默认值为false
   final bool withDefaultBlockSyntaxes;
@@ -29,21 +32,22 @@ class MarkdownGenerator {
   ///指定哪些标签需要被解析，如果不指定，则所有标签都将被解析
   final List<String> tags;
 
-  MarkdownGenerator({
-    this.inlineSyntaxList = const [],
-    this.blockSyntaxList = const [],
-    this.linesMargin = const EdgeInsets.symmetric(vertical: 8),
-    this.generators = const [],
-    this.onNodeAccepted,
-    this.extensionSet,
-    this.textGenerator,
-    this.spanNodeBuilder,
-    this.richTextBuilder,
-    this.splitRegExp,
-    this.withDefaultBlockSyntaxes = false,
-    this.withDefaultInlineSyntaxes = false,
-    this.tags = const [],
-  });
+  MarkdownGenerator(
+      {this.inlineSyntaxList = const [],
+      this.blockSyntaxList = const [],
+      this.linesMargin = const EdgeInsets.symmetric(vertical: 8),
+      this.generators = const [],
+      this.onNodeAccepted,
+      this.extensionSet,
+      this.textGenerator,
+      this.spanNodeBuilder,
+      this.richTextBuilder,
+      this.splitRegExp,
+      this.withDefaultBlockSyntaxes = false,
+      this.withDefaultInlineSyntaxes = false,
+      this.tags = const [],
+      headingNodeFilter})
+      : headingNodeFilter = headingNodeFilter ?? allowAll;
 
   ///convert [data] to widgets
   ///[onTocList] can provider [Toc] list
@@ -71,7 +75,7 @@ class MarkdownGenerator {
         splitRegExp: regExp,
         onNodeAccepted: (node, index) {
           onNodeAccepted?.call(node, index);
-          if (node is HeadingNode) {
+          if (node is HeadingNode && headingNodeFilter(node)) {
             final listLength = tocList.length;
             tocList.add(
                 Toc(node: node, widgetIndex: index, selfIndex: listLength));
@@ -85,13 +89,15 @@ class MarkdownGenerator {
       final textSpan = spanNodeBuilder?.call(span) ?? span.build();
       final richText = richTextBuilder?.call(textSpan) ?? Text.rich(textSpan);
       if (i == spans.length - 1) {
-      widgets.add(richText);
+        widgets.add(richText);
       } else {
-      widgets.add(Padding(padding: linesMargin, child: richText));
+        widgets.add(Padding(padding: linesMargin, child: richText));
       }
     }
     return widgets;
   }
+
+  static bool allowAll(HeadingNode toc) => true;
 }
 
 typedef SpanNodeBuilder = TextSpan Function(SpanNode spanNode);

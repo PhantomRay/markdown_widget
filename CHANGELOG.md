@@ -10,7 +10,10 @@
   - Fix [#159](https://github.com/asjqkkkk/markdown_widget/issues/159)
 - 2.3.2+5
 - 2.3.2+6
+- 2.3.2+7
   - Fix static analysis issues
+- 2.3.2+8
+  - Fix headingTag2Level error
 
 ### [2.3.2]
 - Feat: auto check code language and show it
