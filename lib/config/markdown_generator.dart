@@ -94,9 +94,9 @@ class MarkdownGenerator {
       final textSpan = spanNodeBuilder?.call(span) ?? span.build();
       final richText = richTextBuilder?.call(textSpan) ?? Text.rich(textSpan);
       if (i == spans.length - 1) {
-      widgets.add(richText);
+        widgets.add(richText);
       } else {
-      widgets.add(Padding(padding: linesMargin, child: richText));
+        widgets.add(Padding(padding: linesMargin, child: richText));
       }
     }
     return widgets;
